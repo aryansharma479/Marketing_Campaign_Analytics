@@ -1,0 +1,161 @@
+stages:
+  - install
+  - lint
+  - test
+  - build
+  - security
+  - deploy
+
+variables:
+  NODE_VERSION: "20"
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm/
+    - node_modules/
+
+install:
+  stage: install
+  image: node:${NODE_VERSION}-alpine
+  script:
+    - npm ci
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+lint:
+  stage: lint
+  image: node:${NODE_VERSION}-alpine
+  needs: ["install"]
+  script:
+    - npm run lint
+  allow_failure: false
+
+type-check:
+  stage: lint
+  image: node:${NODE_VERSION}-alpine
+  needs: ["install"]
+  script:
+    - npm run check
+  allow_failure: false
+
+unit-tests:
+  stage: test
+  image: node:${NODE_VERSION}-alpine
+  needs: ["install"]
+  script:
+    - npm run test:unit
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    expire_in: 1 week
+
+integration-tests:
+  stage: test
+  image: node:${NODE_VERSION}-alpine
+  needs: ["install"]
+  services:
+    - postgres:15-alpine
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    DATABASE_URL: "postgresql://test_user:test_password@postgres:5432/test_db"
+  script:
+    - npm run test:integration
+  allow_failure: true
+
+build:
+  stage: build
+  image: node:${NODE_VERSION}-alpine
+  needs: ["lint", "type-check", "unit-tests"]
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+docker-build:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  needs: ["build"]
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+    - develop
+
+security-scan:
+  stage: security
+  image: node:${NODE_VERSION}-alpine
+  needs: ["install"]
+  script:
+    - npm audit --audit-level=high --json > audit-report.json || true
+    - npm audit --audit-level=high
+  artifacts:
+    when: always
+    paths:
+      - audit-report.json
+    expire_in: 1 week
+  allow_failure: true
+
+dependency-check:
+  stage: security
+  image: owasp/dependency-check:latest
+  needs: ["install"]
+  script:
+    - /usr/share/dependency-check/bin/dependency-check.sh --scan . --format JSON --format HTML --out dependency-check-report
+  artifacts:
+    when: always
+    paths:
+      - dependency-check-report/
+    expire_in: 1 week
+  allow_failure: true
+  only:
+    - main
+    - develop
+
+deploy-staging:
+  stage: deploy
+  image: node:${NODE_VERSION}-alpine
+  needs: ["docker-build", "security-scan"]
+  script:
+    - echo "Deploying to staging environment..."
+  environment:
+    name: staging
+    url: https://staging.campaigniq.com
+  only:
+    - develop
+
+deploy-production:
+  stage: deploy
+  image: node:${NODE_VERSION}-alpine
+  needs: ["docker-build", "security-scan"]
+  script:
+    - echo "Deploying to production environment..."
+  environment:
+    name: production
+    url: https://campaigniq.com
+  when: manual
+  only:
+    - main
