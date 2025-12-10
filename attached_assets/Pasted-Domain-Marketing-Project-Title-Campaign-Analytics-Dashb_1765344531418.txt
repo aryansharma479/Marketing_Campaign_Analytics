@@ -1,0 +1,135 @@
+Domain: Marketing
+Project Title: Campaign Analytics Dashboard
+
+Scenario
+Build a marketing analytics dashboard to visualize campaign KPIs and integrate a predictive Model API to forecast conversion rates and ROI.
+Expected Deliverables
+1.	Design an interactive dashboard with charts for conversion rate, CTR, and ROI.
+2.	Use SQL/NoSQL database for campaigns, metrics, and forecasts data.
+3.	Develop APIs for retrieving analytics data and model predictions.
+4.	Optimize performance with caching, pagination, and pre-aggregated data.
+5.	Implement CI/CD pipeline using Docker with unit testing and lint checks.
+6.	Document all APIs and deployment process with screenshots.
+7.	Ensure security compliance and no high/medium vulnerabilities.
+Validations (Client & Server)
+•	Field-level validations: required fields, min/max length, numeric ranges.
+•	Format validations: email regex, phone number format, PAN/Aadhaar pattern (if applicable).
+•	Business-rule validations: sufficient balance, daily transfer limits, unique constraints.
+•	File validations: allowed file types, max size, virus scan for KYC uploads.
+•	Cross-field validations: start date < end date, password confirmation match.
+•	Server-side re-validation: never trust client-side only — validate again on server.
+•	API input validation: strict JSON schema validation (use tools like Joi, Marshmallow, or Spring Validation).
+Exception Handling & Logging
+•	Centralized error handling middleware (e.g., Express error handler, @ControllerAdvice in Spring).
+•	Categorize errors: ValidationError (400), AuthenticationError (401), AuthorizationError (403), NotFound (404), Conflict (409), ServerError (500).
+•	Use structured logging with correlation IDs for tracing across services (request id).
+•	Don't log sensitive data (PII, credentials); mask before logging.
+•	Retry strategies for transient failures and circuit breaker for model API integration.
+•	Expose safe error messages to clients; keep internal details in logs.
+•	Capture metrics for exceptions and alert on anomalous rates.
+Unit, Integration, and End-to-End Testing
+•	Unit tests: test individual functions, validators, and business logic (JUnit, Jest, pytest).
+•	Integration tests: test API endpoints with in-memory DB or test containers (Testcontainers).
+•	Contract tests: validate integration with external Model API (use Pact or stub servers).
+•	End-to-end tests: simulate user flows using Cypress or Selenium for critical paths.
+•	Mock external dependencies (Model API, Payment Gateway) during unit tests.
+•	Coverage targets: aim for >=50% coverage and include coverage report in CI pipeline.
+•	Automate tests in GitLab CI with separate stages for unit, integration, and e2e.
+JWT Authentication & Authorization
+•	Auth flow: Login -> issue access token (short-lived) and refresh token (longer-lived).
+•	Store refresh tokens securely server-side or use rotating refresh tokens.
+•	Access token content: minimal claims (user id, roles, expiry), avoid storing sensitive data.
+•	Use strong signing algorithm (RS256 preferred) and rotate keys periodically.
+•	Token revocation: maintain blacklist or use token versioning in DB to invalidate tokens.
+•	Protect tokens in transit (HTTPS) and in client storage (HttpOnly secure cookies recommended).
+•	Implement role-based access control (RBAC) and scope checks on APIs.
+Visual Design & UX Tasks (Common to All Use Cases)
+•	Follow the given UX prototype or create a simple wireframe in Figma.
+•	Apply consistent color palette, typography, and layout spacing.
+•	Ensure responsive design for desktop, tablet, and mobile.
+•	Use micro-interactions (hover, button click, form validation) to enhance UX.
+•	Maintain accessibility standards (WCAG 2.1 – keyboard navigation, ARIA labels).
+•	Optimize images and assets for faster rendering.
+•	Demonstrate at least one accessibility test using Chrome DevTools or Lighthouse.
+Submission Requirements
+1. GitLab repository link with all source code, CI pipeline, and Dockerfile.
+2. Screenshots and short video (max 5 mins) demonstrating the app and CI/CD pipeline.
+3. API documentation (Swagger/OpenAPI) and Postman collection.
+4. Test reports (coverage, unit/integration/e2e) and vulnerability scan report.
+5. Technical documentation including architecture, schema diagrams, and setup steps.
+
+
+
+
+BRIEF DESCRIPTION OF THE PROJECT:
+Ultimate Project Prompt: Campaign Analytics Dashboard
+Goal: Design, develop, and deploy a secure, high-performance Marketing Campaign Analytics Dashboard that visualizes key performance indicators (KPIs) and integrates a predictive model API for conversion rate and ROI forecasting.
+1. 🏗️ Architecture & Data (Backend)
+Develop a robust backend system that adheres to the following:
+•	Database: Utilize a SQL/NoSQL database to store campaigns, metrics, and forecast data.
+•	APIs: Implement RESTful APIs for:
+o	Retrieving all analytics data.
+o	Fetching model predictions from an integrated Predictive Model API (External).
+•	Performance: Optimize API performance by implementing:
+o	Caching strategies.
+o	Pagination for large datasets.
+o	Pre-aggregated data where appropriate.
+•	Security (JWT Auth): Implement a complete JWT authentication and authorization flow:
+o	Login $\rightarrow$ Issue short-lived access token and long-lived refresh token.
+o	Securely store refresh tokens server-side or use rotating tokens.
+o	Use a strong signing algorithm (RS256 preferred) and implement key rotation.
+o	Implement token revocation (e.g., blacklist/versioning).
+o	Protect tokens in transit (HTTPS) and in client storage (HttpOnly secure cookies).
+o	Implement Role-Based Access Control (RBAC) and scope checks on APIs.
+2. 🛡️ Validation, Exception Handling & Logging
+Implement enterprise-grade reliability and security features:
+•	Validations: Apply strict input validation on all APIs:
+o	Field-Level: Required fields, min/max length, numeric ranges.
+o	Format: Email regex, phone number format.
+o	Business Rules: Unique constraints, sufficient balance/limits (conceptually).
+o	Cross-Field: Start date $<$ end date, password confirmation match.
+o	API Input: Enforce strict JSON schema validation (e.g., using Joi/Marshmallow/Spring Validation).
+o	Server-Side: Always re-validate on the server; never trust client-side only.
+•	Exception Handling:
+o	Implement a centralized error handling middleware.
+o	Categorize errors using appropriate HTTP status codes (e.g., 400, 401, 403, 404, 409, 500).
+o	Expose safe error messages to clients; keep internal details in logs.
+•	Logging:
+o	Use structured logging with correlation IDs (request ID) for tracing.
+o	Mask/Never log sensitive data (PII, credentials).
+•	Resilience: Implement retry strategies for transient failures and a circuit breaker pattern for the external Model API integration.
+3. 📊 Frontend (Dashboard & UX)
+Create an interactive and accessible user interface:
+•	Interactive Dashboard: Design and build an interactive dashboard using a modern framework (e.g., React, Vue, Angular).
+•	Visualization: Display charts for core campaign KPIs: Conversion Rate, Click-Through Rate (CTR), and Return on Investment (ROI).
+•	Design & UX:
+o	Follow a simple wireframe/prototype (Figma/sketch).
+o	Apply a consistent color palette, typography, and layout spacing.
+o	Ensure responsive design for desktop, tablet, and mobile.
+o	Use micro-interactions (hover, click, validation feedback) for enhanced UX.
+o	Ensure Accessibility standards (WCAG 2.1) are met, including keyboard navigation and ARIA labels.
+o	Optimize images and assets for faster rendering.
+4. 🧪 Quality Assurance (Testing)
+Ensure code quality and reliability through comprehensive testing:
+•	Unit Tests: Develop unit tests for individual functions, validators, and core business logic (e.g., using Jest, JUnit, pytest).
+•	Integration Tests: Test API endpoints with an in-memory database or Testcontainers.
+•	Contract Tests: Validate the interface/contract with the external Predictive Model API (e.g., using Pact or stub servers). Mock external dependencies during unit tests.
+•	End-to-End (E2E) Tests: Simulate critical user flows (e.g., using Cypress/Selenium).
+•	Coverage Target: Aim for $\geq 50\%$ test coverage and include a coverage report in the CI pipeline.
+5. ⚙️ DevOps & Deliverables
+Establish a streamlined, secure deployment process:
+•	CI/CD Pipeline: Implement a full CI/CD pipeline (e.g., GitLab CI):
+o	Use Docker for containerization.
+o	Automate stages for unit, integration, and e2e testing.
+o	Include lint checks and a coverage report generation.
+•	Security Scan: Ensure security compliance with no high/medium vulnerabilities and include a vulnerability scan report.
+•	Documentation: Deliver comprehensive documentation:
+o	GitLab Repository Link with all source code, Dockerfile, and CI pipeline config.
+o	API Documentation (Swagger/OpenAPI format) and a Postman collection.
+o	Test Reports (coverage, unit/integration/e2e) and Vulnerability Scan Report.
+o	Technical Documentation covering architecture, schema diagrams. 
+
+
+
+
+
